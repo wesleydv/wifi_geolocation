@@ -15,7 +15,6 @@ repos:
           - --strict
           - --show-error-codes
         additional_dependencies:
-          - types-aiohttp
           - voluptuous
         files: ^custom_components/.+\.py$
   - repo: https://github.com/pre-commit/pre-commit-hooks

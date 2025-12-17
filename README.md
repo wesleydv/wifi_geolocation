@@ -228,4 +228,3 @@ Update device tracker location
     ↓
 Save to cache
 ```
-

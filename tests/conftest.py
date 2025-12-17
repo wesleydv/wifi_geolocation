@@ -53,11 +53,14 @@ def mock_config_entry() -> MockConfigEntry:
 @pytest.fixture
 def mock_aiohttp_session():
     """Mock aiohttp client session."""
-    with patch(
-        "custom_components.wifi_geolocation.config_flow.async_get_clientsession"
-    ) as mock_get_session, patch(
-        "custom_components.wifi_geolocation.async_get_clientsession"
-    ) as mock_get_session_init:
+    with (
+        patch(
+            "custom_components.wifi_geolocation.config_flow.async_get_clientsession"
+        ) as mock_get_session,
+        patch(
+            "custom_components.wifi_geolocation.async_get_clientsession"
+        ) as mock_get_session_init,
+    ):
         session = AsyncMock()
         mock_get_session.return_value = session
         mock_get_session_init.return_value = session

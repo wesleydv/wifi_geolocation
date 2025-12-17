@@ -22,9 +22,7 @@ from .conftest import (
 )
 
 
-async def test_setup_unload_entry(
-    hass: HomeAssistant, mock_config_entry
-) -> None:
+async def test_setup_unload_entry(hass: HomeAssistant, mock_config_entry) -> None:
     """Test setting up and unloading a config entry."""
     mock_config_entry.add_to_hass(hass)
 
@@ -79,9 +77,7 @@ async def test_geolocate_service_success(
     )
 
     # Verify entity was updated
-    entity.set_geocoded_location.assert_called_once_with(
-        37.7749, -122.4194, 25.0
-    )
+    entity.set_geocoded_location.assert_called_once_with(37.7749, -122.4194, 25.0)
 
 
 async def test_geolocate_service_entity_not_found(

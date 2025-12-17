@@ -15,16 +15,12 @@ from homeassistant.data_entry_flow import FlowResultType
 from .conftest import API_KEY
 
 
-async def test_user_flow_success(
-    hass: HomeAssistant, mock_aiohttp_session
-) -> None:
+async def test_user_flow_success(hass: HomeAssistant, mock_aiohttp_session) -> None:
     """Test successful user flow."""
     # Mock successful API response (400 with non-auth error means API key is valid)
     response = AsyncMock()
     response.status = 400
-    response.json = AsyncMock(
-        return_value={"error": {"message": "Invalid request"}}
-    )
+    response.json = AsyncMock(return_value={"error": {"message": "Invalid request"}})
     mock_aiohttp_session.post.return_value.__aenter__.return_value = response
 
     result = await hass.config_entries.flow.async_init(
@@ -52,9 +48,7 @@ async def test_user_flow_already_configured(
     # Mock successful API response
     response = AsyncMock()
     response.status = 400
-    response.json = AsyncMock(
-        return_value={"error": {"message": "Invalid request"}}
-    )
+    response.json = AsyncMock(return_value={"error": {"message": "Invalid request"}})
     mock_aiohttp_session.post.return_value.__aenter__.return_value = response
 
     result = await hass.config_entries.flow.async_init(
@@ -76,9 +70,7 @@ async def test_user_flow_invalid_auth(
     # Mock invalid API key response
     response = AsyncMock()
     response.status = 400
-    response.json = AsyncMock(
-        return_value={"error": {"message": "API key not valid"}}
-    )
+    response.json = AsyncMock(return_value={"error": {"message": "API key not valid"}})
     mock_aiohttp_session.post.return_value.__aenter__.return_value = response
 
     result = await hass.config_entries.flow.async_init(
@@ -93,9 +85,7 @@ async def test_user_flow_invalid_auth(
     assert result["errors"] == {"base": "invalid_auth"}
 
 
-async def test_user_flow_forbidden(
-    hass: HomeAssistant, mock_aiohttp_session
-) -> None:
+async def test_user_flow_forbidden(hass: HomeAssistant, mock_aiohttp_session) -> None:
     """Test 403 forbidden error handling."""
     # Mock 403 response
     response = AsyncMock()
@@ -143,9 +133,7 @@ async def test_reauth_flow(
     # Mock successful API response
     response = AsyncMock()
     response.status = 400
-    response.json = AsyncMock(
-        return_value={"error": {"message": "Invalid request"}}
-    )
+    response.json = AsyncMock(return_value={"error": {"message": "Invalid request"}})
     mock_aiohttp_session.post.return_value.__aenter__.return_value = response
 
     result = await mock_config_entry.start_reauth_flow(hass)
@@ -169,9 +157,7 @@ async def test_reauth_flow_invalid_auth(
     # Mock invalid API key response
     response = AsyncMock()
     response.status = 400
-    response.json = AsyncMock(
-        return_value={"error": {"message": "API key not valid"}}
-    )
+    response.json = AsyncMock(return_value={"error": {"message": "API key not valid"}})
     mock_aiohttp_session.post.return_value.__aenter__.return_value = response
 
     result = await mock_config_entry.start_reauth_flow(hass)
