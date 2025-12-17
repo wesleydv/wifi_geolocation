@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up WiFi geolocation",
+        "description": "Configure WiFi geolocation using Google Geolocation API. Get an API key at https://console.cloud.google.com/apis/credentials",
+        "data": {
+          "google_geolocation_api_key": "Google Geolocation API key"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reauthenticate WiFi geolocation",
+        "description": "The API key authentication failed. Please provide a valid Google Geolocation API key.",
+        "data": {
+          "google_geolocation_api_key": "Google Geolocation API key"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to Google Geolocation API",
+      "invalid_auth": "Invalid API key",
+      "unknown": "Unexpected error occurred"
+    },
+    "abort": {
+      "already_configured": "WiFi geolocation is already configured"
+    }
+  }
+}

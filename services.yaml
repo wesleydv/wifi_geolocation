@@ -1,0 +1,20 @@
+geolocate:
+  name: Geolocate using WiFi
+  description: Get GPS coordinates from WiFi access points using Google Geolocation API. Automatically caches results by BSSID combination and skips unnecessary API calls.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Device tracker entity with wifi_access_points attribute
+      required: true
+      example: "device_tracker.t1000_jack"
+      selector:
+        entity:
+          domain: device_tracker
+    force:
+      name: Force geolocation
+      description: Force API call even if BSSIDs haven't changed
+      required: false
+      default: false
+      example: false
+      selector:
+        boolean:
