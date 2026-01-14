@@ -31,11 +31,43 @@ This integration adds WiFi-based geolocation capabilities to Home Assistant devi
 
 ### 2. Install the Integration
 
-1. Copy the `wifi_geolocation` folder to your `custom_components` directory
-2. Restart Home Assistant
-3. Go to **Settings** → **Devices & Services** → **Add Integration**
-4. Search for "WiFi Geolocation"
-5. Enter your Google Geolocation API key
+1. **Clone the repository into your custom_components folder:**
+   ```bash
+   cd /config/custom_components  # or wherever your HA config directory is
+   git clone https://github.com/wesleydv/wifi_geolocation
+   ```
+
+2. **Restart Home Assistant**
+
+3. **Add the integration via the UI:**
+   - Go to **Settings** → **Devices & Services**
+   - Click **+ Add Integration** (bottom right)
+   - Search for "WiFi Geolocation"
+   - Click on it to configure
+
+4. **Enter your Google Geolocation API key** when prompted
+
+#### SenseCAP T1000 Device Support
+
+⚠️ **Important:** For SenseCAP T1000 devices to work with WiFi geolocation, a fix to the `ttn_client` library is required. This fix handles the nested message format that T1000 devices use.
+
+**Status:** The fix is currently in [PR #22](https://github.com/angelnu/thethingsnetwork_python_client/pull/22) awaiting merge. Once merged and released, the official Home Assistant integration will automatically use the fixed version.
+
+**Workaround (until official release):**
+
+To use WiFi geolocation with SenseCAP T1000 devices right now, install the fixed version directly:
+
+```bash
+# SSH into your Home Assistant instance or use the Terminal add-on
+# Stop Home Assistant first if running as a service
+
+# Install the fixed version from the PR branch
+pip install git+https://github.com/wesleydv/thethingsnetwork_python_client.git@fix/sensecap-t1000-nested-lists
+
+# Restart Home Assistant
+```
+
+**Note:** You'll need to reinstall this after Home Assistant updates until the fix is officially released.
 
 ### 3. Configure Your Device Trackers
 
