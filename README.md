@@ -49,25 +49,154 @@ This integration adds WiFi-based geolocation capabilities to Home Assistant devi
 
 #### SenseCAP T1000 Device Support
 
-⚠️ **Important:** For SenseCAP T1000 devices to work with WiFi geolocation, a fix to the `ttn_client` library is required. This fix handles the nested message format that T1000 devices use.
+⚠️ **Important:** For SenseCAP T1000 devices to work with WiFi geolocation, **two requirements** must be met:
 
-**Status:** The fix is currently in [PR #22](https://github.com/angelnu/thethingsnetwork_python_client/pull/22) awaiting merge. Once merged and released, the official Home Assistant integration will automatically use the fixed version.
+1. **TTN Device Tracker Support** - The Things Network integration needs device tracker platform support
+   - **Status:** Currently in [PR #160948](https://github.com/home-assistant/core/pull/160948) to Home Assistant core (awaiting merge)
+   - Once merged, the TTN integration will automatically create device trackers for location-capable devices
 
-**Workaround (until official release):**
+2. **ttn_client Library Fix** - Handles the nested message format that T1000 devices use
+   - **Status:** Currently in [PR #22](https://github.com/angelnu/thethingsnetwork_python_client/pull/22) (awaiting merge)
+   - Once merged and released, the official Home Assistant integration will automatically use the fixed version
 
-To use WiFi geolocation with SenseCAP T1000 devices right now, install the fixed version directly:
+**Workaround (until official releases):**
+
+To use WiFi geolocation with SenseCAP T1000 devices right now, you need to install both the custom TTN integration and the fixed ttn_client library:
+
+**Step 1: Install Custom TTN Integration with Device Tracker Support**
+
+⚠️ **Note:** This will override the built-in TTN integration with a custom version that includes device tracker support.
 
 ```bash
 # SSH into your Home Assistant instance or use the Terminal add-on
-# Stop Home Assistant first if running as a service
+
+# Download and extract the custom TTN integration (one-liner)
+cd /tmp && \
+wget -qO- https://github.com/wesleydv/core-1/archive/refs/heads/thethingsnetwork/add-device-tracker-support.tar.gz | \
+  tar xz --strip-components=3 core-1-thethingsnetwork-add-device-tracker-support/homeassistant/components/thethingsnetwork && \
+mkdir -p /config/custom_components && \
+mv thethingsnetwork /config/custom_components/
+
+# Add version key to manifest (required for custom integrations)
+sed -i '/"requirements"/s/$/,/' /config/custom_components/thethingsnetwork/manifest.json
+sed -i '/requirements/a\  "version": "0.1.0"' /config/custom_components/thethingsnetwork/manifest.json
+```
+
+**Alternative Method 1 (Git sparse checkout):**
+```bash
+git clone --depth 1 --filter=blob:none --sparse \
+  -b thethingsnetwork/add-device-tracker-support \
+  https://github.com/wesleydv/core-1.git /tmp/temp_core && \
+cd /tmp/temp_core && \
+git sparse-checkout set homeassistant/components/thethingsnetwork && \
+mkdir -p /config/custom_components && \
+cp -r homeassistant/components/thethingsnetwork /config/custom_components/ && \
+rm -rf /tmp/temp_core
+
+# Add version key to manifest (required for custom integrations)
+sed -i '/"requirements"/s/$/,/' /config/custom_components/thethingsnetwork/manifest.json
+sed -i '/requirements/a\  "version": "0.1.0"' /config/custom_components/thethingsnetwork/manifest.json
+```
+
+**Alternative Method 2 (Individual file downloads):**
+```bash
+mkdir -p /config/custom_components/thethingsnetwork/translations && \
+cd /config/custom_components/thethingsnetwork && \
+BASE_URL="https://raw.githubusercontent.com/wesleydv/core-1/thethingsnetwork/add-device-tracker-support/homeassistant/components/thethingsnetwork" && \
+for file in __init__.py config_flow.py const.py coordinator.py device_tracker.py entity.py manifest.json sensor.py strings.json; do \
+  wget -q "$BASE_URL/$file" -O "$file"; \
+done && \
+wget -q "$BASE_URL/translations/en.json" -O "translations/en.json"
+
+# Add version key to manifest (required for custom integrations)
+sed -i '/"requirements"/s/$/,/' /config/custom_components/thethingsnetwork/manifest.json
+sed -i '/requirements/a\  "version": "0.1.0"' /config/custom_components/thethingsnetwork/manifest.json
+```
+
+**Optional: Download Verification Script**
+
+```bash
+wget https://raw.githubusercontent.com/wesleydv/core-1/thethingsnetwork/add-device-tracker-support/verify_ttn_install.sh -O /config/verify_ttn_install.sh
+chmod +x /config/verify_ttn_install.sh
+```
+
+**Step 2: Install Fixed ttn_client Library**
+
+```bash
+# Uninstall the current version
+pip uninstall -y ttn-client
 
 # Install the fixed version from the PR branch
 pip install git+https://github.com/wesleydv/thethingsnetwork_python_client.git@fix/sensecap-t1000-nested-lists
 
-# Restart Home Assistant
+# Verify the installation
+pip show ttn-client
+# You should see the package installed from the git repository
 ```
 
-**Note:** You'll need to reinstall this after Home Assistant updates until the fix is officially released.
+**Step 3: Restart Home Assistant**
+
+Go to **Settings** → **System** → **Restart**
+
+**Verify everything is working:**
+
+1. Check the ttn_client fix is installed:
+   ```bash
+   grep -n "isinstance.*list" /usr/local/lib/python3.*/site-packages/ttn_client/parsers/sensecap.py
+   # If you see line numbers with nested list handling code, the fix is installed!
+   ```
+
+2. Check for device tracker entity:
+   - Go to **Developer Tools** → **States**
+   - Look for `device_tracker.your_device_name`
+   - It should have a `wifi_access_points` attribute with the WiFi scan data
+
+3. WiFi geolocation should automatically trigger when WiFi data changes
+
+**Troubleshooting: Device Tracker Not Appearing**
+
+If you see sensor entities but NO device tracker entity after installation:
+
+1. **Verify custom integration is actually loaded:**
+   ```bash
+   # Check if custom integration files exist
+   ls -la /config/custom_components/thethingsnetwork/device_tracker.py
+
+   # Run verification script (if downloaded earlier)
+   bash /config/verify_ttn_install.sh
+   ```
+
+2. **Force reload the TTN integration:**
+   - Go to **Settings** → **Devices & Services**
+   - Find "The Things Network" integration
+   - Click the three dots menu (⋮) → **Reload**
+   - Check if device tracker appears
+
+3. **If still not working, completely remove and re-add:**
+
+   This is often necessary if the TTN integration was set up BEFORE you installed the custom version.
+
+   - Go to **Settings** → **Devices & Services**
+   - Find "The Things Network" integration
+   - Click the three dots menu (⋮) → **Delete**
+   - Restart Home Assistant
+   - Re-add the TTN integration (it should now use the custom version)
+   - Your devices and data will be automatically rediscovered
+
+4. **Verify the custom integration is being used:**
+   ```bash
+   grep "custom_components.thethingsnetwork" /config/home-assistant.log
+   # You should see log entries showing the custom integration is loaded
+   ```
+
+**Important Notes:**
+- You'll need to reinstall the ttn_client library after Home Assistant updates
+- The custom TTN integration overrides the built-in one and will persist until you manually remove it
+- Once both PRs are merged, remove the custom integration to use the official version:
+  ```bash
+  rm -rf /config/custom_components/thethingsnetwork
+  # Then restart Home Assistant
+  ```
 
 ### 3. Configure Your Device Trackers
 
