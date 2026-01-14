@@ -89,22 +89,13 @@ async def _call_geolocation_api(
     longitude = location["lng"]
     accuracy = result.get("accuracy", 0)
 
-    _LOGGER.warning(
-        "========================================\n"
-        "✓ GEOCODING SUCCESS!\n"
-        "  Entity: %s\n"
-        "  Latitude: %s\n"
-        "  Longitude: %s\n"
-        "  Accuracy: %s meters\n"
-        "  Wi-Fi APs used: %d\n"
-        "  BSSIDs: %s\n"
-        "========================================",
+    _LOGGER.debug(
+        "Geocoded %s: lat=%s, lon=%s, accuracy=%s meters (%d Wi-Fi APs)",
         entity_id,
         latitude,
         longitude,
         accuracy,
         len(wifi_aps),
-        len(current_bssids),
     )
 
     return latitude, longitude, accuracy

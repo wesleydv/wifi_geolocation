@@ -3,9 +3,8 @@
   "name": "WiFi Geolocation",
   "version": "1.0.0",
   "config_flow": true,
-  "documentation": "",
   "requirements": [],
-  "codeowners": [],
+  "codeowners": ["wesleydv"],
   "iot_class": "cloud_polling",
   "integration_type": "service"
 }
